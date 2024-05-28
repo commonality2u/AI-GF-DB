@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Login</title>
+
+  <link rel="stylesheet" href="../static/css/login.css">
+
+  <!-- custom style -->
+  <style>
+    .failed input {
+      border-color: red;
+      box-shadow: 0 0 5px red;
+    }
+  </style>
+  <script>function show_hide_password(target) {
+      var input = document.getElementById('password-input');
+      if (input.getAttribute('type') == 'password') {
+        target.classList.add('view');
+        input.setAttribute('type', 'text');
+      } else {
+        target.classList.remove('view');
+        input.setAttribute('type', 'password');
+      }
+      return false;
+    }</script>
+
+</head>
+
+<body>
+  <section>
+    <div class="box">
+      <div class="square" style="--i:0;"></div>
+      <div class="square" style="--i:1;"></div>
+      <div class="square" style="--i:2;"></div>
+      <div class="square" style="--i:3;"></div>
+      <div class="square" style="--i:4;"></div>
+      <div class="square" style="--i:5;"></div>
+
+      <div class="container">
+
+        <div class="form">
+          <h2>LOGIN</h2>
+          <form action="" method="POST">
+            {% if login_error %}
+            <div class="failed">
+              <p>Invalid username or password</p>
+              <!-- br -->
+              <br />
+            </div>
+            <div class="inputBx">
+              <input name="username" style="border-color: red; box-shadow: 0 0 5px red;" type="text" required="required"
+                {% if login_error %}class="error" {% endif %}>
+              <span>Username</span>
+              <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="inputBx password">
+              <input id="password-input" style="border-color: red; box-shadow: 0 0 5px red;" id="password"
+                type="password" name="password" required="required" {% if login_error %}class="error" {% endif %}>
+              <span>Password</span>
+              <a href="#" class="password-control" onclick="return show_hide_password(this);"></a>
+              <i class="fas fa-key"></i>
+            </div>
+            {% endif %}
+
+            {% if not login_error %}
+            <div class="inputBx">
+              <input name="username" type="text" required="required" {% if login_error %}class="error" {% endif %}>
+              <span>Login</span>
+              <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="inputBx password">
+              <input id="password-input" id="password" type="password" name="password" required="required" {% if
+                login_error %}class="error" {% endif %}>
+              <span>Password</span>
+              <a href="#" class="password-control" onclick="return show_hide_password(this);"></a>
+              <i class="fas fa-key"></i>
+            </div>
+            {% endif %}
+            <label class="remember"><input type="checkbox" name="remember">
+              Remember Me</label>
+            <div class="inputBx">
+              <input type="submit" value="Log in">
+            </div>
+          </form>
+          <p>Forgot password? <a href="#">Click Here</a></p>
+          <p>Don't have an account? <a href="register">Sign up</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+</body>
+
+</html>

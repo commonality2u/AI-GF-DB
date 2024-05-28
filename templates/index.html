@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>LipSync Video</title>
+    <style>
+        /* Set up a flex container */
+        .flex-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Add some space between elements */
+        .flex-container>* {
+            margin-bottom: 10px;
+        }
+
+        @keyframes fadein {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        #video {
+            width: 100vw;
+            height: auto;
+            border-radius: 5px;
+            animation: fadein 1s;
+        }
+
+        .video-container {
+            width: 100%;
+            /* or any size you want */
+            height: 100%;
+            /* fixed height */
+            overflow: hidden;
+            /* to ensure nothing spills out of the container */
+            border-radius: 5px;
+            /* Rounded corners */
+            display: auto;
+            justify-content: center;
+            align-items: center;
+        }
+
+
+        #text-input,
+        #preference-input {
+            width: 70%;
+            /* Shorter width */
+            height: 10%;
+            /* Taller height */
+            padding: 10px;
+            border: none;
+            display: flex;
+            /* need to be changed by view button */
+            border-radius: 20px;
+            /* Rounded edges */
+            outline: none;
+            font-size: 20px;
+            resize: none;
+        }
+
+
+        .button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            /* Rounded buttons */
+            color: white;
+            cursor: pointer;
+            outline: none;
+            transition: background 0.3s ease-in-out;
+            /* Smooth transition */
+            font-size: 18px;
+        }
+
+        #submit-button,
+        #submit-preference-button {
+            background: #007bff;
+            display: flex;
+        }
+
+        #submit-button:hover,
+        #submit-preference-button:hover {
+            background: #0056b3;
+        }
+
+        /* Styles for the microphone button */
+        .mic-button {
+            background: white;
+            border: none;
+            border-radius: 60%;
+            /* Circular button */
+            width: 50px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            /* Add some shadow */
+            transition: background 0.3s ease-in-out;
+            /* Smooth transition */
+        }
+
+        .mic-button:hover,
+        .mic-button:active {
+            background: #ddd;
+        }
+
+        .mic-icon {
+            width: 50%;
+            height: 50%;
+        }
+
+        #video,
+        #text-input,
+        #preference-input,
+        #submit-button {
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            /* Add some shadow */
+            transition: box-shadow 0.3s ease-in-out;
+            /* Smooth transition */
+        }
+
+        #video:hover,
+        #text-input:hover,
+        #preference-input:hover,
+        #submit-button:hover {
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2);
+            /* Add some shadow */
+        }
+
+        /* CSS for large screens */
+        @media (min-width: 800px) {
+            .video-container {
+                width: 70%;
+                height: 70%;
+            }
+        }
+
+        /* CSS for small screens */
+        @media (max-width: 800px) {
+            .video-container {
+                width: 100%;
+                height: auto;
+            }
+        }
+
+
+        /*       Dark theme style//------------------------------------------------------------------------------ */
+        /* Dark theme styles */
+        body.dark-theme {
+            color: #f8f9fa;
+            /*                     background-color: #1c1c1c; */
+            background-color: #F8F9FA
+        }
+
+        /* Light theme styles */
+        body.light-theme {
+            color: #444;
+            background-color: #f8f9fa;
+        }
+
+        /* Styles for the toggle switch */
+        .theme-toggle-container {
+            position: absolute;
+            top: 10px;
+            right: 30px;
+        }
+
+        .theme-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .theme-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .view-container {
+            position: absolute;
+            top: 120px;
+            right: 30px;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: 0.4s;
+            transition: 0.4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            -webkit-transition: 0.4s;
+            transition: 0.4s;
+        }
+
+        input:checked+.slider {
+            background-color: #2196f3;
+        }
+
+        input:checked+.slider:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(26px);
+        }
+
+        /* Rounded sliders */
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+
+        /*        Chat History and Change personality button /////////////////////////////////////////////// */
+        .chat-history {
+            width: 82%;
+            /* same width as text input */
+            height: 200px;
+            /* you can adjust the height as needed */
+            overflow-y: auto;
+            /* make it scrollable vertically */
+            display: flex;
+            /* need to change for view button */
+            flex-direction: column;
+            gap: 10px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+            /* space between chat history and text input */
+
+            background: linear-gradient(to right, #f8f9fa, #e9ecef);
+            /* Add gradient background */
+            border-radius: 10px;
+            /* Rounded corners for chat history */
+        }
+
+        .chat-history .user-message,
+        .chat-history .bot-message {
+            padding: 5px;
+            border-radius: 5px;
+
+            color: #333;
+            /* Darker text color */
+        }
+
+        .chat-history .user-message {
+            align-self: flex-end;
+            background-color: #d1ecf1;
+        }
+
+        .chat-history .bot-message {
+            align-self: flex-start;
+            background-color: #d4edda;
+        }
+
+
+        .button-container {
+            display: flex;
+            /* need to change for view button */
+            justify-content: center;
+            align-items: center;
+            padding: 0px;
+            /*                   display:none; */
+            gap: 20px;
+            /* adjust as needed to add some space between the buttons */
+        }
+
+        /*         /////////////////////////////////////////////// */
+
+        #change-personality-button {
+            background: #ffffff;
+            /* Set the button color to white */
+            border: none;
+            border-radius: 50%;
+            /* Make the button round */
+            width: 100px;
+            /* Fixed width and height to make a perfect circle */
+            height: 100px;
+            display: flex;
+            /* Center the icon in the button */
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            /* Add a subtle shadow */
+            transition: background 0.3s ease-in-out;
+            /* Smooth transition */
+            color: #000000;
+            /* Set the text color to black */
+
+        }
+
+        #change-personality-button:hover {
+            background: #ddd;
+            /* Set a different color for hover */
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+            /* Make the shadow more pronounced on hover */
+        }
+
+        #view-button {
+            background: #ffffff;
+            /* Set the button color to white */
+            border: none;
+            border-radius: 50%;
+            /* Make the button round */
+            width: 100px;
+            /* Fixed width and height to make a perfect circle */
+            height: 100px;
+            display: flex;
+            /* Center the icon in the button */
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            /* Add a subtle shadow */
+            transition: background 0.3s ease-in-out;
+            /* Smooth transition */
+            color: #000000;
+            /* Set the text color to black */
+        }
+
+        #view-button:hover {
+            background: #ddd;
+            /* Set a different color for hover */
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+            /* Make the shadow more pronounced on hover */
+        }
+
+        #back-button {
+            background: #ffffff;
+            /* Set the button color to white */
+            border: none;
+            border-radius: 50%;
+            /* Make the button round */
+            width: 100px;
+            /* Fixed width and height to make a perfect circle */
+            height: 100px;
+            display: none;
+            /* Center the icon in the button */
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            /* Add a subtle shadow */
+            transition: background 0.3s ease-in-out;
+            /* Smooth transition */
+            color: #000000;
+            /* Set the text color to black */
+        }
+
+        #back-button:hover {
+            background: #ddd;
+            /* Set a different color for hover */
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+            /* Make the shadow more pronounced on hover */
+        }
+
+        #clear-conversation-button,
+        #clear-preference-button {
+            background: #6c757d;
+            /* Grey background color */
+            color: #ffffff;
+            /* White text */
+        }
+
+        #clear-conversation-button:hover,
+        #clear-preference-button:hover {
+            background: #5a6268;
+            /* Slightly darker grey for hover effect */
+        }
+    </style>
+</head>
+
+<body class="dark-theme">
+    <div class="flex-container">
+        <div class="video-container">
+            <video id="video" autoplay loop muted style="width: 100%; height: 100%">
+                <source
+                    src="https://cdn.glitch.global/d02f8f67-1720-48fe-907d-c70042503ba5/coffee_woman_ai_resting.mp4?v=1713548715874" />
+                Your browser does not support the video tag.
+            </video>
+        </div>
+
+        <div id="chat-history" class="chat-history">
+            <!-- Chat history will be added here -->
+        </div>
+        <div name="text-button group">
+            <div style="display: flex;">
+
+                <textarea id="text-input" type="text" placeholder="Type  here to talk to avatar"></textarea>
+
+
+
+                <div class="button-container">
+                    <button id="clear-conversation-button" class="button">Clear</button>
+                    <button id="submit-button" class="button">Submit</button>
+
+                    <!-- Microphone button -->
+                    <button id="voice-input-button" class="mic-button">
+                        <img class="mic-icon" src="https://pic.onlinewebfonts.com/svg/img_244689.png"
+                            alt="Microphone Icon" />
+                    </button>
+                </div>
+            </div>
+            <div style="display:flex;">
+
+                <textarea id="preference-input" type="text"
+                    placeholder="Type your preference here, in key-value form(e.g. Fav.city: nyc)"></textarea>
+                <div class="pereference_buttons">
+                    <button id="clear-preference-button" class="button">Clear</button>
+                    <button id="submit-preference-button" class="button">Submit</button>
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+
+
+    </div>
+
+    <!--     <div class="theme-toggle-container">
+      <label class="theme-switch" for="checkbox">
+        <input type="checkbox" id="checkbox" />
+        <div class="slider round"></div>
+      </label>
+    </div> -->
+
+    <div class="theme-toggle-container">
+        <button id="change-personality-button" class="button">Change</button>
+    </div>
+
+    <div class="view-container">
+        <button id="view-button" class="button">View</button>
+        <button id="back-button" class="button">Back</button>
+    </div>
+
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+
+</body>
+
+</html>

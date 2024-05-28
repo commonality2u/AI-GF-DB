@@ -1,0 +1,31 @@
+.dataTables_wrapper {
+    margin-left: 50px;
+    margin-right: 50px;
+}
+
+.dt-buttons {
+    margin-bottom: 10px;
+}
+
+.dt-buttons button {
+    border: none;
+    border-radius: 4px;
+    margin-right: 10px;
+    padding: 6px 12px;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.5;
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+}
+
+.dt-buttons button:hover {
+    background-color: #0069d9;
+}
+
+.equipment-title {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    font-size: 100em;
+}
