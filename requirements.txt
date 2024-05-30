@@ -1,1 +1,10 @@
-openai==0.28
+openai
+Flask
+Flask_Bcrypt
+Flask_Login
+flask_wtf
+openai
+pymongo
+python-dotenv
+Requests
+WTForms
