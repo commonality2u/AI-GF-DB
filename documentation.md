@@ -49,7 +49,7 @@ Pre-requisites:
     ```
 3. Run the application:
     ```bash
-    python app.py
+    python server.py
     ```
 
 # API Documentation for Flask Application
