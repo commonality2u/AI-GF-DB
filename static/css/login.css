@@ -249,7 +249,7 @@ section {
   -webkit-text-fill-color: transparent;
 }
 
-.select .inputBx {
+select {
   outline: none;
   border: none;
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -262,7 +262,27 @@ section {
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
 }
 
-.select select option {
+/* select {
+  outline: none;
+  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.2);
+  padding: 7px 10px;
+  padding-left: 10px;
+  border-radius: 15px;
+  color: #fff;
+  font-size: 16px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns%3D%22http%3A//www.w3.org/2000/svg%22 width%3D%22292.362%22 height%3D%22292.362%22 viewBox%3D%220 0 292.362 292.362%22%3E%3Cpath fill%3D%22%23FFFFFF%22 d%3D%22M287.017 69.442L166.09 190.37c-4.477 4.48-11.719 4.48-16.197 0L5.345 69.442C3.349 67.444 1.527 64.978 0 62.145c-1.527-2.831-2.292-5.896-2.292-9.093 0-3.196.765-6.262 2.292-9.093 1.527-2.832 3.349-5.298 5.345-7.295 1.997-1.996 4.463-3.818 7.295-5.345 2.832-1.527 5.897-2.292 9.093-2.292s6.262.765 9.093 2.292c2.832 1.527 5.298 3.349 7.295 5.345L146.667 153.6 270.574 29.693c1.997-1.996 4.463-3.818 7.295-5.345 2.832-1.527 5.897-2.292 9.093-2.292 3.197 0 6.262.765 9.093 2.292 2.832 1.527 5.298 3.349 7.295 5.345 1.996 1.997 3.818 4.463 5.345 7.295 1.527 2.832 2.292 5.897 2.292 9.093 0 3.197-.765 6.262-2.292 9.093-1.527 2.832-3.349 5.298-5.345 7.295z%22/%3E%3C/svg%3E');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+} */
+
+select option {
   background: rgba(226, 226, 226, 0.8);
   color: #000;
 }
