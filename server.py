@@ -236,8 +236,6 @@ def generate_audio(text, voice_model):
 
 
 def retrieve_relevant_data(text_prompt):
-    # Perform a simple search query in MongoDB
-    # This example assumes you have a field 'text' in your documents
     results = collection.find({"text": {"$regex": text_prompt, "$options": "i"}})
     relevant_data = [doc["text"] for doc in results]
     return relevant_data
@@ -251,24 +249,47 @@ def get_history():
     conversation = collection.find_one({"user_id": user_id})
 
     if conversation:
-        print(conversation["history"])
+        # print(conversation["history"])
         return jsonify({"history": conversation["history"]})
     else:
-        print("No conversation found")
+        # print("No conversation found")
         return jsonify({"history": []}), 404
 
 
+@app.route("/clear-history", methods=["POST"])
+@login_required
+def clear_history():
+    try:
+        collection.delete_many({"user_id": current_user.id})
+        print("History cleared")
+        return jsonify({"success": True, "message": "History cleared"})
+    except Exception as e:
+        print(f"Error deleting history: {e}")
+        return jsonify({"error": False, "message": "Failed to clear history"}), 500
+
+
 @app.route("/generate-lipsync", methods=["POST"])
+@login_required
 def generate_lipsync():
     data = request.json
     text_prompt = data["text_prompt"]
     input_face = data["input_face"]
     extra_prompt = data["extra_prompt"]
-    ai_personality = data["ai_personality"]
     session_id = data["sessionId"]
     character_name = data.get("characterName", "Rachel")
     voice_model = CHARACTER_VOICES.get(character_name, current_voice_model)
     user_id = current_user.id
+
+    # Search for user's preference in the database
+    username = current_user.username
+    user = users_collection.find_one({"username": username})
+    # get personality from user
+    if user:
+        ai_personality = user.get("ai_personality", "")
+    else:
+        ai_personality = "ENTP"
+
+    ai_personality = "Behave as " + ai_personality + " with" + data["ai_personality"]
 
     if session_id not in sessions:
         sessions[session_id] = [{"role": "system", "content": ai_personality}]
@@ -310,6 +331,7 @@ def generate_lipsync():
         if gpt_text:
             audio_id = generate_audio(gpt_text, voice_model)
             audio_url = f"/audio/{audio_id}"
+            # print(f"prompt: {augmented_prompt}, audio_url: {audio_url}")
             return jsonify({"chatGptResponse": gpt_text, "audioUrl": audio_url})
         else:
             return jsonify({"error": "Empty response from OpenAI API"}), 500
