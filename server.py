@@ -129,6 +129,11 @@ def index():
     )
 
 
+@app.route("/chat", methods=["POST", "GET"])
+def chat():
+    return render_template("video.html")
+
+
 ## Auth
 @app.route("/register", methods=["GET", "POST"])
 def register():
