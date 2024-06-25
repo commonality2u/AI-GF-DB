@@ -415,11 +415,7 @@
         </div>
         <div name="text-button group">
             <div style="display: flex;">
-
                 <textarea id="text-input" type="text" placeholder="Type  here to talk to avatar"></textarea>
-
-
-
                 <div class="button-container">
                     <button id="clear-conversation-button" class="button">Clear</button>
                     <button id="submit-button" class="button">Submit</button>
@@ -439,15 +435,34 @@
                     <button id="clear-preference-button" class="button">Clear</button>
                     <button id="submit-preference-button" class="button">Submit</button>
                 </div>
+                <div class="pereference_buttons"
+                    style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                    <form id="personality-form">
+                        <select id="personality-select">
+                            <option value="ENTP">ENTP</option>
+                            <option value="ESTJ">ESTJ</option>
+                            <option value="ESFJ">ESFJ</option>
+                            <option value="ENFP">ENFP</option>
+                            <option value="ESTP">ESTP</option>
+                            <option value="ESFP">ESFP</option>
+                            <option value="ENTJ">ENTJ</option>
+                            <option value="ENFJ">ENFJ</option>
+                            <option value="INFP">INFP</option>
+                            <option value="INFJ">INFJ</option>
+                            <option value="INTP">INTP</option>
+                            <option value="INTJ">INTJ</option>
+                            <option value="ISFP">ISFP</option>
+                            <option value="ISFJ">ISFJ</option>
+                            <option value="ISTP">ISTP</option>
+                            <option value="ISTJ">ISTJ</option>
+                        </select>
+                        <button class="button" type="submit">Change Personality</button>
+                    </form>
+                </div>
 
             </div>
 
         </div>
-
-
-
-
-
     </div>
 
     <!--     <div class="theme-toggle-container">

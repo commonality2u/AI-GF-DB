@@ -9,6 +9,7 @@ const changePersonalityButton = document.getElementById("change-personality-butt
 const viewButton = document.getElementById("view-button");
 const backButton = document.getElementById("back-button");
 
+
 let currentAvatar = originalVideoSrc;
 
 // Initialize a new SpeechRecognition object
@@ -111,6 +112,32 @@ function addMessageToChatHistory(content, sender) {
 
     chatHistory.scrollTop = chatHistory.scrollHeight;
 }
+document.getElementById('personality-form').addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    const selectedPersonality = document.getElementById('personality-select').value;
+    const data = { ai_personality: selectedPersonality };
+
+    fetch('/change-personality', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Personality changed to: ' + selectedPersonality);
+            } else {
+                alert('Failed to change personality: ' + data.message);
+            }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            alert('Failed to send request.');
+        });
+});
 
 document.getElementById("submit-button").addEventListener("click", async () => {
     console.log("Button clicked");

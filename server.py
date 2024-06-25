@@ -377,5 +377,42 @@ def change_character():
         return jsonify({"success": False, "message": "Character not found"}), 400
 
 
+@app.route("/change-personality", methods=["POST"])
+def change_personality():
+    ai_personality = request.json.get("ai_personality")
+    # Check if the AI personality is valid
+    if ai_personality in [
+        "ENTP",
+        "ESTJ",
+        "ESFJ",
+        "ENFP",
+        "ESTP",
+        "ESFP",
+        "ENTJ",
+        "ENFJ",
+        "INFP",
+        "INFJ",
+        "INTP",
+        "INTJ",
+        "ISFP",
+        "ISFJ",
+        "ISTP",
+        "ISTJ",
+    ]:
+        # Update it to database
+        users_collection.update_one(
+            {"username": current_user.username},
+            {"$set": {"ai_personality": ai_personality}},
+        )
+        return (
+            jsonify(
+                {"success": True, "message": f"Personality changed to {ai_personality}"}
+            ),
+            200,
+        )
+
+    return jsonify({"success": False, "message": "Invalid AI personality"}), 400
+
+
 if __name__ == "__main__":
     app.run(port=os.getenv("PORT", 5000))
