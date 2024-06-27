@@ -9,19 +9,12 @@ const changePersonalityButton = document.getElementById("change-personality-butt
 const viewButton = document.getElementById("view-button");
 const backButton = document.getElementById("back-button");
 
-
 let currentAvatar = originalVideoSrc;
-
 // Initialize a new SpeechRecognition object
-let recognition = new (window.SpeechRecognition ||
-    window.webkitSpeechRecognition ||
-    window.mozSpeechRecognition ||
-    window.msSpeechRecognition)();
+let recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition || window.mozSpeechRecognition || window.msSpeechRecognition)();
 
 let personalityIndex = 0;
-const personalities = [
-    ""
-];
+const personalities = [""];
 const videoUrls = [
     "https://cdn.glitch.global/d02f8f67-1720-48fe-907d-c70042503ba5/coffee_woman_ai_resting.mp4?v=1713548715874",
     "https://cdn.glitch.global/d02f8f67-1720-48fe-907d-c70042503ba5/coffee_woman_ai.mp4?v=1713548711063"
@@ -98,8 +91,8 @@ function loadInitialChatHistory() {
 
 function addMessageToChatHistory(content, sender) {
     const chatHistory = document.getElementById("chat-history");
-
     const messageDiv = document.createElement("div");
+
     messageDiv.className = sender === "user" ? "user-message" : "bot-message";
     messageDiv.textContent = content;
 
@@ -112,6 +105,7 @@ function addMessageToChatHistory(content, sender) {
 
     chatHistory.scrollTop = chatHistory.scrollHeight;
 }
+
 document.getElementById('personality-form').addEventListener('submit', function (event) {
     event.preventDefault();
 
@@ -292,6 +286,7 @@ console.log("Generated session ID:", sessionId);
 
 const clearConversationButton = document.getElementById("clear-conversation-button");
 const chatHistory = document.getElementById("chat-history");
+
 loadInitialChatHistory();
 clearConversationButton.addEventListener("click", () => {
     chatHistory.innerHTML = "";

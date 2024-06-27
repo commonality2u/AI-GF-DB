@@ -16,6 +16,7 @@ from flask import (
     url_for,
     flash,
     session,
+    send_from_directory,
 )
 from flask_login import (
     LoginManager,
@@ -126,6 +127,15 @@ def index():
 
     return render_template(
         "index.html", loggedin_user=current_user_name, chat_history=chat_history
+    )
+
+
+@app.route("/favicon.ico")
+def favicon():
+    return send_from_directory(
+        os.path.join(app.root_path, "static"),
+        "favicon.ico",
+        mimetype="image/vnd.microsoft.icon",
     )
 
 
