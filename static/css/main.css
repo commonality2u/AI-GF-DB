@@ -1,14 +1,17 @@
-body, html {
+body,
+html {
     margin: 0;
     font-family: sans-serif;
 }
 
 .content {
     margin: 50px;
-    
+
 }
 
-table, td, th {
+table,
+td,
+th {
     border: 1px solid #aaa;
 }
 
