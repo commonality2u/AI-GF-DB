@@ -30,6 +30,8 @@ from flask_bcrypt import Bcrypt
 from forms import RegistrationForm, LoginForm
 import sys
 
+from prompting import get_personality_prompt
+
 load_dotenv()
 DEBUG = False
 
@@ -302,12 +304,12 @@ def generate_lipsync():
     if user:
         ai_personality = user.get("ai_personality", "")
     else:
-        ai_personality = "ENTP"
-
-    ai_personality = "Behave as " + ai_personality + " with" + data["ai_personality"]
+        ai_personality = "Lena"
 
     if session_id not in sessions:
-        sessions[session_id] = [{"role": "system", "content": ai_personality}]
+        sessions[session_id] = [
+            {"role": "system", "content": get_personality_prompt(ai_personality)}
+        ]
 
     sessions[session_id].append({"role": "user", "content": text_prompt + extra_prompt})
 
@@ -390,24 +392,10 @@ def change_character():
 @app.route("/change-personality", methods=["POST"])
 def change_personality():
     ai_personality = request.json.get("ai_personality")
-    # Check if the AI personality is valid
+
     if ai_personality in [
-        "ENTP",
-        "ESTJ",
-        "ESFJ",
-        "ENFP",
-        "ESTP",
-        "ESFP",
-        "ENTJ",
-        "ENFJ",
-        "INFP",
-        "INFJ",
-        "INTP",
-        "INTJ",
-        "ISFP",
-        "ISFJ",
-        "ISTP",
-        "ISTJ",
+        "Lena",
+        "Rachel",
     ]:
         # Update it to database
         users_collection.update_one(
