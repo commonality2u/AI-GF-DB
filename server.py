@@ -30,7 +30,7 @@ from flask_bcrypt import Bcrypt
 from forms import RegistrationForm, LoginForm
 import sys
 
-from prompting import get_personality_prompt
+from prompting import get_personality_prompt, get_all_personality_names
 
 load_dotenv()
 DEBUG = False
@@ -389,14 +389,33 @@ def change_character():
         return jsonify({"success": False, "message": "Character not found"}), 400
 
 
+@app.route("/get-all-personalities", methods=["GET"])
+def get_personality():
+    return jsonify(get_all_personality_names()), 200
+
+
+# get current user's ai_personality
+@app.route("/get-current-user-gf-personality", methods=["GET"])
+def get_current_user_gf_personality():
+    if current_user.is_authenticated:
+        username = current_user.username
+        user = users_collection.find_one({"username": username})
+        if user:
+            ai_personality = user.get("ai_personality", "")
+            return jsonify({"ai_personality": ai_personality}), 200
+    return jsonify({"ai_personality": "Lena"}), 200
+
+
 @app.route("/change-personality", methods=["POST"])
 def change_personality():
     ai_personality = request.json.get("ai_personality")
+    if ai_personality == "Choose a personality":
+        return (
+            jsonify({"success": False, "message": "Please choose a personality"}),
+            400,
+        )
 
-    if ai_personality in [
-        "Lena",
-        "Rachel",
-    ]:
+    if ai_personality in get_all_personality_names():
         # Update it to database
         users_collection.update_one(
             {"username": current_user.username},

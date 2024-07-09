@@ -439,10 +439,40 @@
                 <div class="pereference_buttons"
                     style="color:black;display: flex; flex-direction: column; align-items: center; gap: 10px;">
                     <form id="personality-form">
+                        <!-- flask env. get all personalities from api /get-all-personalities and list them -->
                         <select style="color:black" id="personality-select" class="button">
-                            <option style="color:black" value="Lena">Lena</option>
-                            <option style="color:black" value="Rachel">Rachel</option>
+                            <option value="Choose a personality">Choose a personality</option>
                         </select>
+                        <script>
+                            var select = document.getElementById("personality-select");
+
+                            // Fetch all personalities to populate the select options
+                            fetch("/get-all-personalities")
+                                .then(response => response.json())
+                                .then(data => {
+                                    data.forEach(personality => {
+                                        var option = document.createElement("option");
+                                        option.value = personality;
+                                        option.text = personality;
+                                        select.appendChild(option);
+                                    });
+
+                                    // Fetch the current user's AI personality and set it as the selected option
+                                    fetch("/get-current-user-gf-personality")
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            select.value = data.ai_personality;
+                                        })
+                                        .catch(error => {
+                                            console.error('Error fetching current user personality:', error);
+                                        });
+                                })
+                                .catch(error => {
+                                    console.error('Error fetching personalities:', error);
+                                });
+                        </script>
+
+
                         <button style="color:black" class="button" type="submit">Change Personality</button>
                     </form>
 
