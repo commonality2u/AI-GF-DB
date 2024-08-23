@@ -31,7 +31,10 @@ from flask_bcrypt import Bcrypt
 from forms import RegistrationForm, LoginForm
 import sys
 
-from prompting import get_personality_prompt, get_all_personality_names
+from prompting import (
+    get_predefined_personality_prompt,
+    get_all_predefined_personality_names,
+)
 
 load_dotenv()
 DEBUG = False
@@ -40,7 +43,6 @@ app = Flask(__name__)
 bcrypt = Bcrypt(app)
 app.config["SECRET_KEY"] = "arbitrarySecretKey"
 login_manager = LoginManager(app)
-# login_manager.login_view = "login"
 
 # Store audio buffers in memory
 audio_buffers = {}
@@ -75,7 +77,6 @@ except Exception as e:
 db = client["ai-girlfriend-videoreplay-Cluster0"]
 collection = db["conversations"]
 users_collection = db["users"]
-
 
 ### MODEL
 from bson import ObjectId
@@ -189,7 +190,6 @@ def login():
         password = request.form.get("password")
         user_data = users_collection.find_one({"username": username})
 
-        # Debug print statements
         if DEBUG:
             print(f"Username: {username}")
             print(f"Password: {password}")
@@ -259,18 +259,16 @@ def retrieve_relevant_data(text_prompt):
     return relevant_data
 
 
-# API for initilizing the conversation
+# API for initializing the conversation
 @app.route("/get-history", methods=["GET"])
 @login_required
 def get_history():
-    user_id = current_user.id  # or current_user.username depending on your user model
+    user_id = current_user.id
     conversation = collection.find_one({"user_id": user_id})
 
     if conversation:
-        # print(conversation["history"])
         return jsonify({"history": conversation["history"]})
     else:
-        # print("No conversation found")
         return jsonify({"history": []}), 404
 
 
@@ -307,16 +305,25 @@ def generate_lipsync():
     else:
         ai_personality = "Lena"
 
+    ai_personality_prompt = get_predefined_personality_prompt(ai_personality)
+
+    if ai_personality_prompt == "CNF":
+        user_defined_personalities = user.get("personalities", "")
+        if user_defined_personalities:
+            ai_personality_prompt = user_defined_personalities[ai_personality]
+    # print(ai_personality_prompt)
     if session_id not in sessions:
         sessions[session_id] = [
-            {"role": "system", "content": get_personality_prompt(ai_personality)}
+            {
+                "role": "system",
+                "content": "YOU ARE" + ai_personality_prompt,
+            }
         ]
 
     sessions[session_id].append({"role": "user", "content": text_prompt + extra_prompt})
 
     try:
         relevant_data = retrieve_relevant_data(text_prompt)
-        augmented_prompt = text_prompt + " " + " ".join(relevant_data)
 
         conversation = collection.find_one({"user_id": user_id})
         if not conversation:
@@ -349,13 +356,11 @@ def generate_lipsync():
         if gpt_text:
             audio_id = generate_audio(gpt_text, voice_model)
             audio_url = f"/audio/{audio_id}"
-            # print(f"prompt: {augmented_prompt}, audio_url: {audio_url}")
             return jsonify({"chatGptResponse": gpt_text, "audioUrl": audio_url})
         else:
             return jsonify({"error": "Empty response from OpenAI API"}), 500
     except Exception as e:
         print("Error:", str(e))
-
         return jsonify({"error": "Error generating audio"}), 500
 
 
@@ -390,21 +395,21 @@ def change_character():
         return jsonify({"success": False, "message": "Character not found"}), 400
 
 
-@app.route("/add_personality", methods=["POST", "GET"])
+@app.route("/add-personality", methods=["POST", "GET"])
 @login_required
 def add_personality():
     if request.method == "GET":
-        return render_template("add_personality.html")
+        return render_template("add_personalities.html")
 
     if request.method == "POST":
         content = request.json
         name = content["name"]
-        trait = content["trait"]
+        personality = content["personality"]
 
-        # Save the personality to the user's record in the database
+        # Save the personality in a dictionary format
         users_collection.update_one(
             {"_id": ObjectId(current_user.id)},
-            {"$push": {"personalities": {"name": name, "trait": trait}}},
+            {"$set": {f"personalities.{name}": personality}},
             upsert=True,
         )
 
@@ -413,27 +418,21 @@ def add_personality():
 
 @app.route("/get-all-personalities", methods=["GET"])
 @login_required
-def get_personality():
-    # Fetch personalities associated with the current user from MongoDB
+def get_personalities():
+    predefined_personalities = get_all_predefined_personality_names()
+
     user_data = users_collection.find_one({"_id": ObjectId(current_user.id)})
 
-    if user_data and "personalities" in user_data:
-        user_personalities = [
-            personality["name"] for personality in user_data["personalities"]
-        ]
-    else:
-        user_personalities = []
+    if user_data:
+        user_personalities = user_data.get("personalities", {})
+        all_personalities = predefined_personalities + list(user_personalities.keys())
 
-    # Get predefined personalities
-    predefined_personalities = get_all_personality_names()
-
-    # Combine both predefined and user-specific personalities
-    all_personalities = predefined_personalities + user_personalities
+        return jsonify(all_personalities), 200
 
     return jsonify(all_personalities), 200
 
 
-# get current user's ai_personality
+# Get current user's AI personality
 @app.route("/get-current-user-gf-personality", methods=["GET"])
 def get_current_user_gf_personality():
     if current_user.is_authenticated:
@@ -446,6 +445,7 @@ def get_current_user_gf_personality():
 
 
 @app.route("/change-personality", methods=["POST"])
+@login_required
 def change_personality():
     ai_personality = request.json.get("ai_personality")
     if ai_personality == "Choose a personality":
@@ -453,8 +453,17 @@ def change_personality():
             jsonify({"success": False, "message": "Please choose a personality"}),
             400,
         )
+    predefined_personalities = get_all_predefined_personality_names()
+    # Look into user's personalities
+    user_defined_personalities = users_collection.find_one(
+        {"_id": ObjectId(current_user.id)}
+    )["personalities"]
 
-    if ai_personality in get_all_personality_names():
+    combined_personalities = predefined_personalities + list(
+        user_defined_personalities.keys()
+    )
+
+    if ai_personality in combined_personalities:
         # Update it to database
         users_collection.update_one(
             {"username": current_user.username},

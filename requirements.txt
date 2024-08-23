@@ -1,4 +1,5 @@
 openai
+pandas
 Flask
 Flask_Bcrypt
 Flask_Login

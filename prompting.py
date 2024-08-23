@@ -18,9 +18,9 @@ personalities = {
 }
 
 
-def get_personality_prompt(character_name):
-    return personalities.get(character_name, "Default personality prompt")
+def get_predefined_personality_prompt(character_name):
+    return personalities.get(character_name, "CNF")
 
 
-def get_all_personality_names():
+def get_all_predefined_personality_names():
     return list(personalities.keys())
