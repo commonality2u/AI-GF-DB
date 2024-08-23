@@ -26,6 +26,7 @@ from flask_login import (
     logout_user,
     current_user,
 )
+import pandas as pd
 from flask_bcrypt import Bcrypt
 from forms import RegistrationForm, LoginForm
 import sys
@@ -389,9 +390,47 @@ def change_character():
         return jsonify({"success": False, "message": "Character not found"}), 400
 
 
+@app.route("/add_personality", methods=["POST", "GET"])
+@login_required
+def add_personality():
+    if request.method == "GET":
+        return render_template("add_personality.html")
+
+    if request.method == "POST":
+        content = request.json
+        name = content["name"]
+        trait = content["trait"]
+
+        # Save the personality to the user's record in the database
+        users_collection.update_one(
+            {"_id": ObjectId(current_user.id)},
+            {"$push": {"personalities": {"name": name, "trait": trait}}},
+            upsert=True,
+        )
+
+        return jsonify({"message": "Personality added successfully!"})
+
+
 @app.route("/get-all-personalities", methods=["GET"])
+@login_required
 def get_personality():
-    return jsonify(get_all_personality_names()), 200
+    # Fetch personalities associated with the current user from MongoDB
+    user_data = users_collection.find_one({"_id": ObjectId(current_user.id)})
+
+    if user_data and "personalities" in user_data:
+        user_personalities = [
+            personality["name"] for personality in user_data["personalities"]
+        ]
+    else:
+        user_personalities = []
+
+    # Get predefined personalities
+    predefined_personalities = get_all_personality_names()
+
+    # Combine both predefined and user-specific personalities
+    all_personalities = predefined_personalities + user_personalities
+
+    return jsonify(all_personalities), 200
 
 
 # get current user's ai_personality

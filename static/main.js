@@ -34,6 +34,15 @@ recognition.lang = "en-US";
 recognition.interimResults = false;
 recognition.maxAlternatives = 1;
 
+async function autoDetectVoiceInput() {
+    while (true) {
+        if (!isAISpeaking) {
+            recognition.start();
+        }
+        await new Promise(resolve => setTimeout(resolve, 500));
+    }
+}
+
 recognition.onresult = function (event) {
     document.getElementById("text-input").value = event.results[0][0].transcript;
 };
@@ -106,6 +115,58 @@ function addMessageToChatHistory(content, sender) {
     chatHistory.scrollTop = chatHistory.scrollHeight;
 }
 
+function handleAISpeech(audioUrl) {
+    const audioPlayer = new Audio(audioUrl);
+
+    audioPlayer.addEventListener('play', () => {
+        console.log('Audio has started playing');
+        isAISpeaking = true;
+        voiceInputButton.disabled = true; // Disable the button while AI is speaking
+        updateVideoSource(videoUrls[1]); // Update video source while AI is speaking
+    });
+
+    audioPlayer.addEventListener('ended', () => {
+        console.log('Audio has finished playing');
+        isAISpeaking = false;
+        voiceInputButton.disabled = false; // Enable the button after AI finishes speaking
+        updateVideoSource(videoUrls[0]); // Revert video source after AI finishes speaking
+        autoDetectVoiceInput(); // Restart voice input detection after AI stops speaking
+    });
+
+    audioPlayer.addEventListener('error', (error) => {
+        console.error('Error occurred while playing audio:', error);
+        isAISpeaking = false;
+        voiceInputButton.disabled = false; // Ensure button is enabled in case of error
+        updateVideoSource(videoUrls[0]); // Revert video in case of error
+    });
+
+    // Play the audio and handle any playback issues
+    try {
+        audioPlayer.play().catch(error => {
+            console.error('Playback failed:', error);
+            isAISpeaking = false;
+            voiceInputButton.disabled = false; // Ensure button is enabled in case of playback failure
+        });
+    } catch (error) {
+        console.error('Error occurred during audio play attempt:', error);
+        isAISpeaking = false;
+        voiceInputButton.disabled = false; // Ensure button is enabled in case of error
+    }
+}
+function handleApiResponse(data) {
+    // Assuming data contains the audio URL and any necessary video updates
+    if (data.audioUrl) {
+        handleAISpeech(data.audioUrl); // Play the audio and update video accordingly
+    } else {
+        console.error("No audio URL received from API response");
+    }
+
+    // Handle additional response data, like chat messages or video updates...
+    if (data.chatGptResponse) {
+        addMessageToChatHistory(data.chatGptResponse, "bot");
+    }
+}
+
 document.getElementById('personality-form').addEventListener('submit', function (event) {
     event.preventDefault();
 
@@ -160,30 +221,23 @@ document.getElementById("submit-button").addEventListener("click", async () => {
             sessionId: sessionId
         })
     })
-        .then(response => {
-            console.log("Response from server.js", response);
-            return response.json();
-        })
-        .then(data => {
-            const audioUrl = data.audioUrl;
-            const audioPlayer = new Audio(audioUrl);
-            audioPlayer.addEventListener('play', () => {
-                console.log('Audio has started playing');
-                updateVideoSource(videoUrls[1]);
-            });
-            audioPlayer.play();
-            audioPlayer.onended = () => {
-                updateVideoSource(videoUrls[0]);
-            }
+        .then((response) => response.json())
+        .then(data => handleApiResponse(data))
+        .then((data) => {
+            // Assuming the API's response contains an 'output' field with 'output_video' field for the URL of the new video
+            // updateVideoSource(data.output.output_video);
+            handleAISpeech(data.audioUrl);
 
+            // Add GPT-3 response to chat history
             if (data.chatGptResponse) {
                 addMessageToChatHistory(data.chatGptResponse, "bot");
             }
         })
-        .catch(error => {
+        .catch((error) => {
             console.error("Error:", error);
+            isAISpeaking = false;
+            voiceInputButton.disabled = false; // Enable the button in case of an error
         });
-    textInput.value = "";
 });
 
 videoElement.onloadedmetadata = () => {
